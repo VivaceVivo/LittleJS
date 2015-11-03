@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Morphic!</title>
+		<script type="text/javascript" src="js/morphic.js"></script>
+		<script type="text/javascript" src="js/blocks.js"></script>
+        <script type="text/javascript" src="js/widgets.js"></script>
+        <script type="text/javascript" src="js/threads.js"></script>
+        <script type="text/javascript" src="js/objects.js"></script>
+        <script type="text/javascript" src="js/byob.js"></script>
+		<script type="text/javascript">			
+var	world; 
+var editor;
+            
+window.onload = function () {
+			
+    world = new WorldMorph(document.getElementById('world'));                
+   
+    editor = new ScriptsMorph();
+    editor.setExtent(new Point(800, 600));
+	world.add(editor);
+
+    WorldMorph.prototype.customMorphs = function () {
+        // add examples to the world's demo menu
+        
+        var command = new CommandBlockMorph();
+        //command.minSnapDistance = 20;
+        //command.feedbackColor = 'yellow';
+        command.feedbackMinHeight = 5;
+        command.setExtent(new Point(300, 120));
+        //command.snap
+        
+        
+        return [
+            new HatBlockMorph(),
+            
+            editor,
+            command,
+            new CSlotMorph(),
+            new InputSlotMorph(),
+            new InputSlotMorph(null, true),
+            new BooleanSlotMorph(),
+            new ColorSlotMorph(),
+            new TemplateSlotMorph('foo'),
+            new ReporterBlockMorph(),
+            new ReporterBlockMorph(true),
+            new ArrowMorph(),
+            new MultiArgMorph(),
+            new FunctionSlotMorph(),
+            new ReporterSlotMorph(),
+            new ReporterSlotMorph(true),
+            new RingMorph(),
+            new RingCommandSlotMorph(),
+            new RingReporterSlotMorph(),
+            new RingReporterSlotMorph(true)
+        ];
+
+    };
+
+    world.isDevMode = true;
+    setInterval(loop, 50);
+    
+    
+};
+           
+function loop() {
+	world.doOneCycle();
+}
+		</script>
+	</head>
+	<body>
+		<canvas id="world" tabindex="1" width="800" height="600" style="position: absolute;">
+			<p>Your browser doesn't support canvas.</p>
+		</canvas>
+	</body>
+</html>
