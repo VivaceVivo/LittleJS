@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Morphic!</title>
+		<title>LittleJS</title>
 		<script type="text/javascript" src="js/morphic.js"></script>
 		<script type="text/javascript" src="js/blocks.js"></script>
         <script type="text/javascript" src="js/widgets.js"></script>
@@ -15,6 +15,7 @@ var	world;
 var editor;
             
 window.onload = function () {
+
 			
     world = new WorldMorph(document.getElementById('world'));                
    
@@ -37,8 +38,8 @@ window.onload = function () {
         
         return [
             new HatBlockMorph(),
-            editor,
-            command,
+            new ScriptsMorph(),
+            new CommandBlockMorph(),
             new CSlotMorph(),
             new InputSlotMorph(),
             new InputSlotMorph(null, true),
