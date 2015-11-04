@@ -25,12 +25,17 @@ var source = function(pos){
 	h.mouseClickLeft = function (pos) {
 		var h2 = new HatBlockMorph();
 		h2.setSpec("SOURCE");
+		h2.selector = "outburst";
 		h2.mouseClickLeft = function (pos) {h2.pickUp();}
 		world.add(h2);
 		h2.pickUp();
 	}
 	return h;
 };
+
+var outburst = function(){
+	window.alert("yeah!")
+}
 
 var filter = function(pos){
 	 var command = new CommandBlockMorph();
