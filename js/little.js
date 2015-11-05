@@ -57,7 +57,7 @@ var filter = function(pos){
 	 command.setSpec("filter");
 	 command.mouseClickLeft = function (pos) {
 		var command2 = new CommandBlockMorph();
-		command2.setSpec("filter");
+		
 		command2.mouseClickLeft = function (pos) {command2.pickUp();}
 		command2.sound = function(audioContext, input){
 			// FILTER PART
@@ -74,6 +74,10 @@ var filter = function(pos){
 			input.gain= 0.5;
 			return filter;
 		}
+		var freq = new InputSlotMorph("freq.", true);
+		command2.addBack(new StringMorph("filter"));
+		command2.addBack(freq);
+		
 		world.add(command2);
 		command2.pickUp();
 	}
