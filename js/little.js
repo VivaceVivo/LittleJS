@@ -24,9 +24,13 @@ littleInitialization = function () {
 
 	world.add(editor);
 
-	world.add(noise(1));
-	world.add(filter(2));
-	world.add(speaker(4));
+	world.add(noiseSource(1, sources));
+	world.add(periodicSource(2, sources));
+
+	world.add(biquadFilter(4));
+	world.add(delay(5));
+	world.add(panningFilter(6));
+	world.add(speaker(7));
 	
 	var exeButton = new PushButtonMorph(null, execute, "play sound");
 	//exeButton.label = "execute";
@@ -44,7 +48,7 @@ initAudio = function(){
 	return audioContext;
 }
 
-
+/*
 var filter = function(pos){
 	 var command = new CommandBlockMorph();
 	 command.bounds.origin = (new Point(10, 45 * pos));
@@ -101,6 +105,7 @@ var filter = function(pos){
 	}
 	return command;
 }
+*/
 
 var speaker = function(pos){
 	var command = new CommandBlockMorph();
@@ -126,6 +131,7 @@ var speaker = function(pos){
 	return command;
 }
 
+/*
 var noise = function(pos){
 	 var command = new HatBlockMorph();
 	 command.bounds.origin = (new Point(10, 45 * pos));
@@ -161,7 +167,7 @@ var noise = function(pos){
 	
 	 return command;
 }
-
+*/
 var execute = function(){
 
 	// BEGIN
