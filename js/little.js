@@ -1,58 +1,48 @@
 /*
 
-    little.js
+	little.js
 
-    setting up the Environment
+	setting up the Environment
 */
 
 var audioContext;
-var gain;
+var gain; // Master
 var playing = false;
+var sources = [];
 
 littleInitialization = function () {
-    var stage = IDE_Morph.createStage;
-    
-    audioContext = initAudio();
-    BlockMorph.prototype.sound = function (audioContext, input) {};
-    
-    var w = window;
-    x = w.innerWidth || e.clientWidth || g.clientWidth
-    editor = new ScriptsMorph(stage);
-    editor.setExtent(new Point(x, 600));
-    editor.bounds.origin.x = 600;
-    world.add(editor);
-    src = source(1);
-    world.add(src);
-    //editor.children.push(src);
-    world.add(filter(2));
-    world.add(noise(3));
-    world.add(speaker(4));
-    
-    var exeButton = new PushButtonMorph(null, execute, "play sound");
-    //exeButton.label = "execute";
+	var stage = IDE_Morph.createStage;
+	
+	audioContext = initAudio();
+	BlockMorph.prototype.sound = function (audioContext, input) {};
+	
+	var w = window;
+	x = w.innerWidth || e.clientWidth || g.clientWidth
+	editor = new ScriptsMorph(stage);
+	editor.setExtent(new Point(x, 600));
+	editor.bounds.origin.x = 600;
+
+	world.add(editor);
+
+	world.add(noise(1));
+	world.add(filter(2));
+	world.add(speaker(4));
+	
+	var exeButton = new PushButtonMorph(null, execute, "play sound");
+	//exeButton.label = "execute";
    //  exeButton.mouseClickLeft = function (pos) {
- 		// execute();
+		// execute();
    //  }
-    world.add(exeButton);
- 	
+	world.add(exeButton);
+	MorphicPreferences.useSliderForInput=true;
+	
 };
 
 initAudio = function(){
-    audioContext = new window.AudioContext;
-    gain = audioContext.createGain();
-    return audioContext;
+	audioContext = new window.AudioContext;
+	gain = audioContext.createGain();
+	return audioContext;
 }
-
-var source = function(pos){
-    
-    var h = new HatBlockMorph();
-    
-    h.bounds.origin = (new Point(10, 45 * pos));
-    h.setSpec("SOURCE");
-    
-    h.mouseClickLeft = function (pos) {h.pickUp();};	
-    return h;
-};
 
 
 var filter = function(pos){
@@ -62,11 +52,33 @@ var filter = function(pos){
 	 command.mouseClickLeft = function (pos) {
 		var command2 = new CommandBlockMorph();
 		var freq = new InputSlotMorph("freq.", true);
-		freq.setContents(440)
+		freq.setContents(440);
+		var superReactToKeystroke = freq.reactToKeystroke;
+		freq.reactToKeystroke = function(){
+			filter.frequency.value = freq.evaluate();
+			//superReactToKeystroke();
+		}
+		var superReactToEdit = freq.reactToEdit;
+		freq.reactToEdit = function(){
+			world.activeMenu.items[0].start = 1;
+			world.activeMenu.items[0].stop = 4000;
+			//superReactToEdit();
+		}
+		var superReactToSliderEdit = freq.reactToSliderEdit
+		freq.reactToSliderEdit = function(){
+			filter.frequency.value = freq.evaluate();
+			//superReactToSliderEdit();
+		}
+
+		freq.executeOnSliderEdit = true;
+		
+        freq.fixLayout();
+
+		var filter;
 		command2.mouseClickLeft = function (pos) {command2.pickUp();}
 		command2.sound = function(audioContext, input){
 			// FILTER PART
-			var filter = audioContext.createBiquadFilter();
+			filter = audioContext.createBiquadFilter();
 			// kind of filter
 			filter.type = "lowpass";
 			// characteristic frequency
@@ -79,42 +91,47 @@ var filter = function(pos){
 			input.gain= 0.5;
 			return filter;
 		}
-		
+
 		command2.add(new StringMorph("filter"));
 		command2.add(freq);
 		command2.fixLayout();
 		world.add(command2);
 		command2.pickUp();
 	
-    }
-    return command;
+	}
+	return command;
 }
 
 var speaker = function(pos){
-    var command = new CommandBlockMorph();
-    command.bounds.origin = (new Point(10, 45 * pos));
-    command.setSpec("speaker");
-    command.mouseClickLeft = function (pos) {
-	var command2 = new CommandBlockMorph();
-	command2.setSpec("speaker");
-	command2.mouseClickLeft = function (pos) {command2.pickUp();}
-	command2.sound = function(audioContext, input){
-	    // Plug it in.
-	    // input.start(0);
-	    input.connect(gain);
+	var command = new CommandBlockMorph();
+	command.bounds.origin = (new Point(10, 45 * pos));
+	command.setSpec("speaker");
+	command.mouseClickLeft = function (pos) {
+		var command2 = new CommandBlockMorph();
+		command2.setSpec("speaker");
+		command2.mouseClickLeft = function (pos) {command2.pickUp();}
+		command2.sound = function(audioContext, input){
+			// Plug it in.
+			// input.start(0);
+			input.connect(gain);
+		}
+		world.add(command2);
+
+		//pic = new Image();
+		//pic.src="images/speaker.png";
+		//world.add(pic);
+
+		command2.pickUp();
 	}
-	world.add(command2);
-	command2.pickUp();
-    }
-    return command;
+	return command;
 }
 
 var noise = function(pos){
-	 var command = new CommandBlockMorph();
+	 var command = new HatBlockMorph();
 	 command.bounds.origin = (new Point(10, 45 * pos));
 	 command.setSpec("white noise");
 	 command.mouseClickLeft = function (pos) {
-		var command2 = new CommandBlockMorph();
+		var command2 = new HatBlockMorph();
 		command2.setSpec("white noise");
 		command2.mouseClickLeft = function (pos) {command2.pickUp();}
 		
@@ -129,18 +146,17 @@ var noise = function(pos){
 			  //data[i] = ((Math.random() * 2) - 1);
 			  data[i] = (Math.random() - 0.5);
 			}
-					    
+						
 			// Create a source node from the buffer.
 			var bufferSource = audioContext.createBufferSource();
 			bufferSource.buffer = buffer;
 			bufferSource.loop = true;
-			
-			//bufferSource.connect(audioContext.destination);
 
 			bufferSource.start(0);
 			return bufferSource;
 		}
 		command2.pickUp();
+		sources.push(command2);
 	}
 	
 	 return command;
@@ -148,22 +164,28 @@ var noise = function(pos){
 
 var execute = function(){
 
-    // BEGIN
-    // Added without understanding the rest
-    if(!playing){
+	// BEGIN
+	// Added without understanding the rest
+	if(!playing){
 		playing = true;
+		gain = audioContext.createGain();
 		gain.connect(audioContext.destination);
-    }else{
+
+		for(src of sources){
+			var blocksequence = src.blockSequence();
+			var pipe = src.sound(audioContext, pipe);
+
+			for(block of blocksequence){
+				pipe = block.sound(audioContext, pipe);
+			}
+		}
+	 }else{
 		playing = false;
 		gain.disconnect(audioContext.destination);
-    }
-    // END
-    
-    var blocksequence = src.blockSequence();
-    var pipe;
-
-    for(block of blocksequence){
-		pipe = block.sound(audioContext, pipe);
-    }
+		gain = null;
+	}
+	// END
+	
+	
 
 }
