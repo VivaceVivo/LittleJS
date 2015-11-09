@@ -9,6 +9,7 @@ var audioContext;
 var gain; // Master
 var playing = false;
 var sources = [];
+var midiGains = [];
 
 littleInitialization = function () {
 	var stage = IDE_Morph.createStage;
@@ -26,11 +27,12 @@ littleInitialization = function () {
 
 	world.add(noiseSource(1, sources));
 	world.add(periodicSource(2, sources));
-
-	world.add(biquadFilter(4));
-	world.add(delay(5));
-	world.add(panningFilter(6));
-	world.add(speaker(7));
+	world.add(midiSource(3, sources));
+	world.add(midi(4));
+	world.add(biquadFilter(5));
+	world.add(delay(6));
+	world.add(panningFilter(7));
+	world.add(speaker(8));
 	
 	var exeButton = new PushButtonMorph(null, execute, "play sound");
 	//exeButton.label = "execute";
@@ -39,6 +41,7 @@ littleInitialization = function () {
    //  }
 	world.add(exeButton);
 	MorphicPreferences.useSliderForInput=true;
+	initialiseMidi();
 	
 };
 

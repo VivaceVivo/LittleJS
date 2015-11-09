@@ -22,6 +22,7 @@ var createParameterSlot = function(setValue, defaultValue, min, max){
 	paramSlot.reactToEdit = function(){
 		world.activeMenu.items[0].start = min;
 		world.activeMenu.items[0].stop = max;
+		world.activeMenu.items[0].value = defaultValue;
 	}
 	paramSlot.reactToSliderEdit = function(){
 		setValue(paramSlot.evaluate());
@@ -90,7 +91,6 @@ var panningFilter = function(pos){
 
 	panningTemplate.mouseClickLeft = function (pos) {
 		var filter = audioContext.createPanner();
-
 		var panning = createFilterBlock("panning");
 
 		// frequency slider
@@ -98,30 +98,24 @@ var panningFilter = function(pos){
 		var x = 0;
 		var y = 0;
 		var z = 0;
-		var setX = function(value){x = value;}
-		var slideX = createParameterSlot(setX, 0, -3, 3);
+		var setX = function(value){x = value;filter.setPosition(x/10,y/10,z/10);}
+		var slideX = createParameterSlot(setX, 0, -30, 30);
 		panning.add(new StringMorph("X"));
 		panning.add(slideX);
 
-		var setY = function(value){y = value;}
-		var slideY = createParameterSlot(setY, 0, -3, 3);
+		var setY = function(value){y = value;filter.setPosition(x/10,y/10,z/10);}
+		var slideY = createParameterSlot(setY, 0, -30, 30);
 		panning.add(new StringMorph("Y"));
 		panning.add(slideY);
 
-		var setZ = function(value){z = value;}
-		var slideZ = createParameterSlot(setZ, 0, -3, 3);
+		var setZ = function(value){z = value;filter.setPosition(x/10,y/10,z/10);}
+		var slideZ = createParameterSlot(setZ, 0, -30, 30);
 		panning.add(new StringMorph("Z"));
 		panning.add(slideZ);
 
-		// Q slider
-		var setQ = function(value){filter.Q.value = value;}
-
-		var qu = createParameterSlot(setQ, 50, 0, 100);
-		panning.add(new StringMorph("Q"));
-		panning.add(qu);
-
 		panning.mouseClickLeft = function (pos) {panning.pickUp();}
 		panning.sound = function(audioContext, input){
+
 			// FILTER PART
 			filter.setPosition(x,y,z);
 			
@@ -170,6 +164,35 @@ var delay = function(pos){
 	}
 
 	return delayTemplate;
+}
+
+var midi = function(pos){
+	
+	var midiTemplate = createFilterBlock("midi");
+	midiTemplate.bounds.origin = (new Point(10, 45 * pos));
+	midiTemplate.fixLayout();
+	world.add(midiTemplate);
+
+	midiTemplate.mouseClickLeft = function (pos) {
+		var midiGain = audioContext.createGain();
+
+		var midi = createFilterBlock("midi");
+
+		midi.mouseClickLeft = function (pos) {midi.pickUp();}
+		midi.sound = function(audioContext, input){
+			// TODO midi
+			midiGains.push(midiGain.gain);
+			midiGain.gain.value = 0;
+			input.connect(midiGain);
+			return midiGain;
+		}
+
+		midi.fixLayout();
+		world.add(midi);
+		midi.pickUp();
+	}
+
+	return midiTemplate;
 }
 
 // SOURCES
@@ -255,4 +278,43 @@ var periodicSource = function(pos, sources){
 	}
 	
 	 return periodicTemplate;
+}
+
+var midiSource = function(pos, sources){
+	 var midiTemplate = createSourceBlock("midi");
+	 midiTemplate.bounds.origin = (new Point(10, 45 * pos));
+	 midiTemplate.fixLayout();
+
+	 midiTemplate.mouseClickLeft = function (pos) {
+		var midi = createSourceBlock("midi");
+		midi.mouseClickLeft = function (pos) {midi.pickUp();}
+ 
+		var waveForm= new InputSlotMorph("sine", false, ["sine","square","sawtooth","triangle"], true);
+		midi.add(waveForm);
+		
+		world.add(midi);
+		midi.sound = function(audioContext, input){
+		    var oscillators = [];
+		    var node = audioContext.createGain();
+
+		    // TODO midi: start und stop durch methoden aus midi.js schalten lassen
+			function start(i){
+			  if(oscillators[i]){
+			    oscillators[i].stop(0);
+			  }
+			  oscillators[i] = audioContext.createOscillator();
+			  oscillators[i].type.value = waveForm.evaluate();	
+			  oscillators[i].frequency.value = 440.0 * Math.pow(2,(i-69)/12);		
+			  oscillators[i].connect(node);
+			  oscillators[i].start(0);
+			}	
+					  
+		    return node;
+		}
+		midi.fixLayout();
+		midi.pickUp();
+		sources.push(midi);
+	}
+	
+	 return midiTemplate;
 }
