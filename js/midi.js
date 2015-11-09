@@ -27,7 +27,9 @@ function start(i){
   // oscillators[i].connect(filter);	
   // oscillators[i].start(0);
   for(gain of midiGains){
-    gain.value = 1;
+    if(gain.g){
+      gain.g.value = 1;
+    }
   }
 }		
 
@@ -35,12 +37,16 @@ function stop(n){
   // oscillators[n].stop(0);
   // oscillators[n] = null;
   for(gain of midiGains){
-    gain.value = 0;
+    if(gain.g){
+      gain.g.value = 0;
+    }
   }
 }
 		
 function volume(x) {
-  gain.gain.value = x;
+  if(gain){
+    gain.gain.value = x;
+  }
 }
 
 // END of small sound thingy.
@@ -66,7 +72,7 @@ function noteOn(n,v){
   if(midiManagement){
     midiManagement.start(n);
   }
-  start();
+  start(n);
   console.log("On : " + n);
 }
 
@@ -74,7 +80,7 @@ function noteOff(n){
   if(midiManagement){
     midiManagement.stop(n);
   }
-  stop();
+  stop(n);
   console.log("Off: " + n);
 }
 

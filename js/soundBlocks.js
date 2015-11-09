@@ -1,5 +1,6 @@
 /**
-  * 
+  * This file contains all Sound Bits to place on the canvas.
+  *  
   * readme:
   * http://stackoverflow.com/questions/11542192/override-function-in-javascript
   */
@@ -181,7 +182,7 @@ var midi = function(pos){
 		midi.mouseClickLeft = function (pos) {midi.pickUp();}
 		midi.sound = function(audioContext, input){
 			// TODO midi
-			midiGains.push(midiGain.gain);
+			midiGains.push({g:midiGain.gain, i:input});
 			midiGain.gain.value = 0;
 			input.connect(midiGain);
 			return midiGain;
@@ -200,6 +201,7 @@ var midi = function(pos){
 var createSourceBlock = function(label){
 	var block = new HatBlockMorph();
 	block.setSpec(label);
+	block.color = new Color(0,200,0);
 	return block;
 }
 
@@ -232,6 +234,7 @@ var noiseSource = function(pos, sources){
 			bufferSource.start(0);
 			return bufferSource;
 		}
+		noise.fixLayout();
 		noise.pickUp();
 		sources.push(noise);
 	}
@@ -280,8 +283,6 @@ var periodicSource = function(pos, sources){
 	 return periodicTemplate;
 }
 
-var midiManagement;
-
 var midiOszillatorSource = function(pos, sources){
 	 var midiTemplate = createSourceBlock("midi");
 	 midiTemplate.bounds.origin = (new Point(10, 45 * pos));
@@ -291,7 +292,7 @@ var midiOszillatorSource = function(pos, sources){
 		var midi = createSourceBlock("midi");
 		midi.mouseClickLeft = function (pos) {midi.pickUp();}
  
-		var waveForm= new InputSlotMorph("sine", false, ["sine","square","sawtooth","triangle"], true);
+		var waveForm= new InputSlotMorph("sine", false, {"sine":"sine","square":"square","sawtooth":"sawtooth","triangle":"triangle"}, true);
 		midi.add(waveForm);
 		
 		world.add(midi);
@@ -306,20 +307,18 @@ var midiOszillatorSource = function(pos, sources){
 				    oscillators[i].stop(0);
 				  }
 				  oscillators[i] = audioContext.createOscillator();
+				  console.log("setting wave form: " + waveForm.evaluate());
 				  oscillators[i].type.value = waveForm.evaluate();	
 				  oscillators[i].frequency.value = 440.0 * Math.pow(2,(i-69)/12);		
 				  oscillators[i].connect(node);
 				  oscillators[i].start(0);
-				}
-				midiManagement.stop = function(i){
+			}
+			midiManagement.stop = function(i){
 				  if(oscillators[i]){
 				    oscillators[i].stop(0);
 				    oscillators[i] = null;
 				  }
-				}
-		    
-	
-					  
+			}		  
 		    return node;
 		}
 		midi.fixLayout();
@@ -328,4 +327,26 @@ var midiOszillatorSource = function(pos, sources){
 	}
 	
 	 return midiTemplate;
+}
+
+var speaker = function(pos){
+	var command = new CommandBlockMorph();
+	command.bounds.origin = (new Point(10, 45 * pos));
+	command.setSpec("speaker");
+	command.color = new Color(200,0,0);
+	command.mouseClickLeft = function (pos) {
+		var command2 = new CommandBlockMorph();
+		command2.setSpec("speaker");
+		command2.color = new Color(200,0,0);
+		command2.mouseClickLeft = function (pos) {command2.pickUp();}
+		command2.sound = function(audioContext, input){
+			// Plug it in.
+			input.connect(gain);
+		}
+		world.add(command2);
+		command2.fixLayout();
+		command2.pickUp();
+	}
+	command.fixLayout();
+	return command;
 }
