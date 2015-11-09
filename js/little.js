@@ -27,7 +27,7 @@ littleInitialization = function () {
 
 	world.add(noiseSource(1, sources));
 	world.add(periodicSource(2, sources));
-	world.add(midiSource(3, sources));
+	world.add(midiOszillatorSource(3, sources));
 	world.add(midi(4));
 	world.add(biquadFilter(5));
 	world.add(delay(6));

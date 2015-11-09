@@ -280,7 +280,9 @@ var periodicSource = function(pos, sources){
 	 return periodicTemplate;
 }
 
-var midiSource = function(pos, sources){
+var midiManagement;
+
+var midiOszillatorSource = function(pos, sources){
 	 var midiTemplate = createSourceBlock("midi");
 	 midiTemplate.bounds.origin = (new Point(10, 45 * pos));
 	 midiTemplate.fixLayout();
@@ -298,16 +300,25 @@ var midiSource = function(pos, sources){
 		    var node = audioContext.createGain();
 
 		    // TODO midi: start und stop durch methoden aus midi.js schalten lassen
-			function start(i){
-			  if(oscillators[i]){
-			    oscillators[i].stop(0);
-			  }
-			  oscillators[i] = audioContext.createOscillator();
-			  oscillators[i].type.value = waveForm.evaluate();	
-			  oscillators[i].frequency.value = 440.0 * Math.pow(2,(i-69)/12);		
-			  oscillators[i].connect(node);
-			  oscillators[i].start(0);
-			}	
+		    midiManagement = new Object();
+		    midiManagement.start = function(i){
+				  if(oscillators[i]){
+				    oscillators[i].stop(0);
+				  }
+				  oscillators[i] = audioContext.createOscillator();
+				  oscillators[i].type.value = waveForm.evaluate();	
+				  oscillators[i].frequency.value = 440.0 * Math.pow(2,(i-69)/12);		
+				  oscillators[i].connect(node);
+				  oscillators[i].start(0);
+				}
+				midiManagement.stop = function(i){
+				  if(oscillators[i]){
+				    oscillators[i].stop(0);
+				    oscillators[i] = null;
+				  }
+				}
+		    
+	
 					  
 		    return node;
 		}

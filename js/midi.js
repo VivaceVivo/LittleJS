@@ -63,12 +63,18 @@ function volume(x) {
 // PART A - Playing
 
 function noteOn(n,v){
-  start(n);
+  if(midiManagement){
+    midiManagement.start(n);
+  }
+  start();
   console.log("On : " + n);
 }
 
 function noteOff(n){
-  stop(n);
+  if(midiManagement){
+    midiManagement.stop(n);
+  }
+  stop();
   console.log("Off: " + n);
 }
 
@@ -136,6 +142,8 @@ function announceMidiSources(list) {
       if (midiSource)
         midiSource.onmidimessage = handleMidiMessage;
   }
+  console.log("midi selected:"+midiSource);
+
 }
 
 // function reqisterSelector(selectorFunction){
@@ -187,6 +195,7 @@ function handleMidiMessage(ev) {
   var channel = ev.data[0] & 0xf;
   var note = ev.data[1];
   var velocity = ev.data[2];
+  // console.log("midi message" + ev);
   if (status == 8 || ((status == 9) && (velocity == 0))) {
     // note on with velocity 0 is sometimes used as note off
     // note off
