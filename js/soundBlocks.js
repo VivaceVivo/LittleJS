@@ -307,8 +307,9 @@ var midiOszillatorSource = function(pos, sources){
 				    oscillators[i].stop(0);
 				  }
 				  oscillators[i] = audioContext.createOscillator();
-				  console.log("setting wave form: " + waveForm.evaluate());
-				  oscillators[i].type.value = waveForm.evaluate();	
+				  console.log("setting wave form: " + waveForm.contents().text);
+				  oscillators[i].type = waveForm.contents().text;	
+				  console.log("setting wave form: " + oscillators[i].type.value);
 				  oscillators[i].frequency.value = 440.0 * Math.pow(2,(i-69)/12);		
 				  oscillators[i].connect(node);
 				  oscillators[i].start(0);
